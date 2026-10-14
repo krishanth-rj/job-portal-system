@@ -58,8 +58,15 @@ public class DashboardFrame extends JFrame {
             button.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(new Color(215, 224, 236)),
                     BorderFactory.createEmptyBorder(12, 16, 12, 16)));
-            button.addActionListener(event -> JOptionPane.showMessageDialog(this,
-                    feature + " is coming soon.", "Coming soon", JOptionPane.INFORMATION_MESSAGE));
+            button.addActionListener(event -> {
+                if (user.role() == UserRole.EMPLOYER && "Manage Jobs".equals(feature)) {
+                    setVisible(false);
+                    new EmployerJobManagementFrame(user, () -> setVisible(true)).setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            feature + " is coming soon.", "Coming soon", JOptionPane.INFORMATION_MESSAGE);
+                }
+            });
             actions.add(button);
         }
 

@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 
-/** Read-only user queries for the JDBC connectivity check. */
+/** User registration, authentication, and read-only user queries. */
 public class UserDAO {
     private static final String INSERT_USER =
             "INSERT INTO users (name, email, password, phone, role) VALUES (?, ?, ?, ?, ?)";
