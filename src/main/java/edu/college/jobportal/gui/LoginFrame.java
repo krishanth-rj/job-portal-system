@@ -20,6 +20,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -33,16 +34,16 @@ public class LoginFrame extends JFrame {
 
     private final JTextField emailField = new JTextField(24);
     private final JPasswordField passwordField = new JPasswordField(24);
-    private final JButton loginButton = new JButton("Log in");
+    private final JButton loginButton = new JButton("Log In");
     private final JButton registerButton = new JButton("Create an account");
     private final JLabel statusLabel = new JLabel(" ", SwingConstants.CENTER);
 
     public LoginFrame() {
         super("Job Portal Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(480, 430));
         setContentPane(buildContent());
         pack();
+        setMinimumSize(new Dimension(480, Math.max(460, getHeight())));
         setLocationRelativeTo(null);
         loginButton.addActionListener(event -> submitLogin());
         registerButton.addActionListener(event -> openRegistration());
@@ -82,17 +83,10 @@ public class LoginFrame extends JFrame {
         loginButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         registerButton.setFocusPainted(false);
 
-        JPanel actions = new JPanel(new GridBagLayout());
+        JPanel actions = new JPanel(new GridLayout(0, 1, 0, 8));
         actions.setOpaque(false);
-        GridBagConstraints action = new GridBagConstraints();
-        action.gridx = 0;
-        action.gridy = 0;
-        action.fill = GridBagConstraints.HORIZONTAL;
-        action.weightx = 1;
-        action.insets = new Insets(4, 0, 5, 0);
-        actions.add(loginButton, action);
-        action.gridy = 1;
-        actions.add(registerButton, action);
+        actions.add(loginButton);
+        actions.add(registerButton);
         statusLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
         statusLabel.setForeground(MUTED);
         JPanel bottom = new JPanel(new BorderLayout(0, 5));
@@ -104,8 +98,9 @@ public class LoginFrame extends JFrame {
         card.add(fields, BorderLayout.CENTER);
         card.add(bottom, BorderLayout.SOUTH);
         GridBagConstraints cardConstraints = new GridBagConstraints();
-        cardConstraints.fill = GridBagConstraints.HORIZONTAL;
+        cardConstraints.fill = GridBagConstraints.BOTH;
         cardConstraints.weightx = 1;
+        cardConstraints.weighty = 1;
         cardConstraints.insets = new Insets(20, 24, 20, 24);
         background.add(card, cardConstraints);
         return background;

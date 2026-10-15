@@ -70,7 +70,7 @@ public class DashboardFrame extends JFrame {
             actions.add(button);
         }
 
-        JButton logoutButton = new JButton("Log out");
+        JButton logoutButton = new JButton("Logout");
         logoutButton.setFont(new Font("SansSerif", Font.BOLD, 13));
         logoutButton.setForeground(Color.WHITE);
         logoutButton.setBackground(ACCENT);

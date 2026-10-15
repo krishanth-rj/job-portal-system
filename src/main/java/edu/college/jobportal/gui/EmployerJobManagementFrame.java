@@ -125,7 +125,7 @@ public class EmployerJobManagementFrame extends JFrame {
         addCompanyField(fields, "Location", location, 2);
         addCompanyField(fields, "Website", website, 3);
         JButton save = new JButton("Save Company Profile");
-        JButton cancel = new JButton("Cancel");
+        JButton cancel = new JButton("Back to Dashboard");
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.CENTER));
         actions.add(save);
         actions.add(cancel);
@@ -204,9 +204,15 @@ public class EmployerJobManagementFrame extends JFrame {
         JLabel heading = new JLabel("My Jobs — " + company.companyName());
         heading.setFont(new Font("SansSerif", Font.BOLD, 20));
         heading.setForeground(NAVY);
+        JButton backButton = new JButton("← Back to Dashboard");
+        backButton.addActionListener(event -> dispose());
+        JPanel headingAndBack = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        headingAndBack.setOpaque(false);
+        headingAndBack.add(backButton);
+        headingAndBack.add(heading);
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
-        top.add(heading, BorderLayout.WEST);
+        top.add(headingAndBack, BorderLayout.WEST);
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         actions.setOpaque(false);
         actions.add(refreshButton);
