@@ -80,6 +80,8 @@ public class DashboardFrame extends JFrame {
                     openChild(() -> new EmployerApplicantsFrame(user, this::restoreDashboard));
                 } else if (user.role() == UserRole.EMPLOYER && "Manage Jobs".equals(feature)) {
                     openChild(() -> new EmployerJobManagementFrame(user, this::restoreDashboard));
+                } else if (user.role() == UserRole.JOB_SEEKER && "My Profile".equals(feature)) {
+                    openChild(() -> new JobSeekerProfileFrame(user, this::restoreDashboard));
                 } else {
                     JOptionPane.showMessageDialog(this,
                             feature + " is coming soon.", "Coming soon", JOptionPane.INFORMATION_MESSAGE);
