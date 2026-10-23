@@ -65,6 +65,9 @@ public class DashboardFrame extends JFrame {
                 } else if (user.role() == UserRole.JOB_SEEKER && "My Applications".equals(feature)) {
                     setVisible(false);
                     new MyApplicationsFrame(user, this::restoreDashboard).setVisible(true);
+                } else if (user.role() == UserRole.EMPLOYER && "View Applicants".equals(feature)) {
+                    setVisible(false);
+                    new EmployerApplicantsFrame(user, this::restoreDashboard).setVisible(true);
                 } else if (user.role() == UserRole.EMPLOYER && "Manage Jobs".equals(feature)) {
                     setVisible(false);
                     new EmployerJobManagementFrame(user, () -> setVisible(true)).setVisible(true);
