@@ -2,6 +2,7 @@ package edu.college.jobportal.gui;
 
 import edu.college.jobportal.dao.ApplicationDAO;
 import edu.college.jobportal.dao.AuthenticatedUser;
+import edu.college.jobportal.dao.UserSession;
 import edu.college.jobportal.model.ApplicationEntry;
 
 import javax.swing.BorderFactory;
@@ -45,6 +46,9 @@ public class MyApplicationsFrame extends JFrame {
     public MyApplicationsFrame(AuthenticatedUser user, Runnable returnToDashboard) {
         super("My Applications");
         this.user = user;
+        if (!UserSession.isCurrent(user)) {
+            throw new IllegalStateException("An active job seeker session is required.");
+        }
         this.returnToDashboard = returnToDashboard;
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(820, 480));

@@ -4,6 +4,7 @@ import edu.college.jobportal.dao.CompanyDAO;
 import edu.college.jobportal.dao.JobDAO;
 import edu.college.jobportal.dao.UserRole;
 import edu.college.jobportal.dao.AuthenticatedUser;
+import edu.college.jobportal.dao.UserSession;
 import edu.college.jobportal.model.CompanyProfile;
 import edu.college.jobportal.model.JobEntry;
 
@@ -59,6 +60,9 @@ public class EmployerJobManagementFrame extends JFrame {
         super("Employer Job Management");
         if (employer.role() != UserRole.EMPLOYER) {
             throw new IllegalArgumentException("Employer access is required.");
+        }
+        if (!UserSession.isCurrent(employer)) {
+            throw new IllegalStateException("An active employer session is required.");
         }
         this.employer = employer;
         this.onClose = onClose;

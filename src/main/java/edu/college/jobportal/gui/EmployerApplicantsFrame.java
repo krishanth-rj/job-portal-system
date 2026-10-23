@@ -2,6 +2,7 @@ package edu.college.jobportal.gui;
 
 import edu.college.jobportal.dao.ApplicantDAO;
 import edu.college.jobportal.dao.AuthenticatedUser;
+import edu.college.jobportal.dao.UserSession;
 import edu.college.jobportal.model.ApplicantJob;
 import edu.college.jobportal.model.EmployerApplicant;
 
@@ -74,6 +75,9 @@ public class EmployerApplicantsFrame extends JFrame {
     public EmployerApplicantsFrame(AuthenticatedUser employer, Runnable returnToDashboard) {
         super("View Applicants");
         this.employer = employer;
+        if (!UserSession.isCurrent(employer)) {
+            throw new IllegalStateException("An active employer session is required.");
+        }
         this.returnToDashboard = returnToDashboard;
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(940, 570));
@@ -172,7 +176,7 @@ public class EmployerApplicantsFrame extends JFrame {
             @Override
             protected FilterData doInBackground() throws SQLException {
                 return new FilterData(applicantDAO.listJobsForEmployer(employer.userId()),
-                        applicantDAO.listExistingStatuses());
+                        applicantDAO.listExistingStatuses(employer.userId()));
             }
 
             @Override

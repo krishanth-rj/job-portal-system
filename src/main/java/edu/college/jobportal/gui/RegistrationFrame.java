@@ -96,7 +96,7 @@ public class RegistrationFrame extends JFrame {
         clearButton.addActionListener(event -> clearFields());
         JButton backButton = new JButton("Back to Login");
         backButton.addActionListener(event -> {
-            new LoginFrame().setVisible(true);
+            LoginFrame.showLogin();
             dispose();
         });
         JPanel actions = new JPanel(new GridBagLayout());

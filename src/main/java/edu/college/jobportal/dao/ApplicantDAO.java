@@ -17,6 +17,7 @@ public class ApplicantDAO {
     }
 
     public List<ApplicantJob> listJobsForEmployer(int employerUserId) throws SQLException {
+        UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         String sql = """
                 SELECT j.job_id, j.job_title, j.status
                 FROM jobs j
@@ -40,7 +41,8 @@ public class ApplicantDAO {
     }
 
     /** Statuses are drawn from values already stored in the existing VARCHAR column. */
-    public List<String> listExistingStatuses() throws SQLException {
+    public List<String> listExistingStatuses(int employerUserId) throws SQLException {
+        UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         String sql = "SELECT DISTINCT status FROM applications "
                 + "WHERE status IS NOT NULL AND TRIM(status) <> '' ORDER BY status";
         try (Connection connection = DBConnection.getConnection();
@@ -56,6 +58,7 @@ public class ApplicantDAO {
 
     public List<EmployerApplicant> listApplicants(int employerUserId, Integer jobId, String status)
             throws SQLException {
+        UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         StringBuilder sql = new StringBuilder("""
                 SELECT a.application_id, a.job_id, j.job_title, seeker.name, seeker.email, seeker.phone,
                        a.application_date, a.status, js.skills, js.education, js.experience, js.location
@@ -104,6 +107,7 @@ public class ApplicantDAO {
     /** Updates only an application for a job owned by employerUserId and only to a known DB status. */
     public ApplicantStatusUpdate updateStatus(int employerUserId, int applicationId, int jobId, String newStatus)
             throws SQLException {
+        UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         if (newStatus == null || newStatus.isBlank() || newStatus.length() > 30) {
             return new ApplicantStatusUpdate(false, false);
         }

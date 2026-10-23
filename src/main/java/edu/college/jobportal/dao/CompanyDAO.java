@@ -21,6 +21,7 @@ public class CompanyDAO {
             """;
 
     public CompanyProfile findForEmployer(int employerUserId) throws SQLException {
+        UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(FIND_EMPLOYER_COMPANY)) {
             statement.setInt(1, employerUserId);
@@ -33,6 +34,7 @@ public class CompanyDAO {
     /** Creates a profile only for the current employer; serializes concurrent creation by locking its user row. */
     public CompanyProfile createForEmployer(int employerUserId, String name, String description,
                                             String location, String website) throws SQLException {
+        UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         try (Connection connection = DBConnection.getConnection()) {
             boolean originalAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);

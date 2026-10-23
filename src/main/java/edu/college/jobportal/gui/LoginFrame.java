@@ -2,6 +2,7 @@ package edu.college.jobportal.gui;
 
 import edu.college.jobportal.dao.AuthenticatedUser;
 import edu.college.jobportal.dao.UserDAO;
+import edu.college.jobportal.dao.UserSession;
 
 import javax.swing.BorderFactory;
 import javax.swing.plaf.basic.BasicButtonUI;
@@ -23,6 +24,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
@@ -32,6 +35,7 @@ public class LoginFrame extends JFrame {
     private static final Color NAVY = new Color(26, 43, 74);
     private static final Color ACCENT = new Color(39, 104, 196);
     private static final Color MUTED = new Color(100, 116, 139);
+    private static LoginFrame instance;
 
     private final JTextField emailField = new JTextField(24);
     private final JPasswordField passwordField = new JPasswordField(24);
@@ -49,6 +53,33 @@ public class LoginFrame extends JFrame {
         loginButton.addActionListener(event -> submitLogin());
         registerButton.addActionListener(event -> openRegistration());
         getRootPane().setDefaultButton(loginButton);
+        synchronized (LoginFrame.class) {
+            instance = this;
+        }
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent event) {
+                synchronized (LoginFrame.class) {
+                    if (instance == LoginFrame.this) {
+                        instance = null;
+                    }
+                }
+            }
+        });
+    }
+
+    /** Reuses the current login frame instead of opening duplicate sign-in windows. */
+    public static void showLogin() {
+        UserSession.clear();
+        LoginFrame login;
+        synchronized (LoginFrame.class) {
+            if (instance == null || !instance.isDisplayable()) {
+                instance = new LoginFrame();
+            }
+            login = instance;
+        }
+        login.setVisible(true);
+        login.toFront();
     }
 
     private JPanel buildContent() {
@@ -171,6 +202,7 @@ public class LoginFrame extends JFrame {
                         passwordField.requestFocusInWindow();
                         return;
                     }
+                    UserSession.start(user);
                     new DashboardFrame(user).setVisible(true);
                     dispose();
                 } catch (InterruptedException exception) {

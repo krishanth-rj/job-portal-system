@@ -3,6 +3,7 @@ package edu.college.jobportal.gui;
 import edu.college.jobportal.dao.ApplicationDAO;
 import edu.college.jobportal.dao.AuthenticatedUser;
 import edu.college.jobportal.dao.JobDAO;
+import edu.college.jobportal.dao.UserSession;
 import edu.college.jobportal.model.JobListing;
 
 import javax.swing.BorderFactory;
@@ -63,6 +64,9 @@ public class JobSearchFrame extends JFrame {
     public JobSearchFrame(AuthenticatedUser user, Runnable returnToDashboard) {
         super("Search Jobs");
         this.user = user;
+        if (!UserSession.isCurrent(user)) {
+            throw new IllegalStateException("An active job seeker session is required.");
+        }
         this.returnToDashboard = returnToDashboard;
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(930, 570));
@@ -171,7 +175,7 @@ public class JobSearchFrame extends JFrame {
         new SwingWorker<List<JobListing>, Void>() {
             @Override
             protected List<JobListing> doInBackground() throws SQLException {
-                return jobDAO.searchActiveJobs(keyword, location);
+                return jobDAO.searchActiveJobs(user.userId(), keyword, location);
             }
 
             @Override

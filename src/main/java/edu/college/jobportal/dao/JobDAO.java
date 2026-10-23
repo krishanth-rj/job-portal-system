@@ -35,6 +35,7 @@ public class JobDAO {
             """;
 
     public List<JobEntry> listForEmployer(int employerUserId, int companyId) throws SQLException {
+        UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         String sql = SELECT_COLUMNS + OWNERSHIP_JOINS + " WHERE c.company_id = ? AND c.user_id = ? "
                 + "AND u.role = 'EMPLOYER' ORDER BY j.posted_date DESC, j.job_id DESC";
         try (Connection connection = DBConnection.getConnection();
@@ -52,7 +53,8 @@ public class JobDAO {
     }
 
     /** Searches active vacancies only; optional keyword and location filters are parameterized. */
-    public List<JobListing> searchActiveJobs(String keyword, String location) throws SQLException {
+    public List<JobListing> searchActiveJobs(int seekerUserId, String keyword, String location) throws SQLException {
+        UserSession.requireCurrent(seekerUserId, UserRole.JOB_SEEKER);
         String normalizedKeyword = keyword == null ? "" : keyword.trim();
         String normalizedLocation = location == null ? "" : location.trim();
         StringBuilder sql = new StringBuilder(SEEKER_SEARCH_COLUMNS);
@@ -90,6 +92,7 @@ public class JobDAO {
     }
 
     public JobEntry findForEmployer(int employerUserId, int companyId, int jobId) throws SQLException {
+        UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         String sql = SELECT_COLUMNS + OWNERSHIP_JOINS + " WHERE j.job_id = ? AND c.company_id = ? "
                 + "AND c.user_id = ? AND u.role = 'EMPLOYER'";
         try (Connection connection = DBConnection.getConnection();
@@ -104,6 +107,7 @@ public class JobDAO {
     }
 
     public boolean createForEmployer(int employerUserId, int companyId, JobEntry job) throws SQLException {
+        UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         String sql = """
                 INSERT INTO jobs (company_id, job_title, description, required_skills, location,
                                   salary, experience_required, job_type)
@@ -122,6 +126,7 @@ public class JobDAO {
 
     public boolean updateForEmployer(int employerUserId, int companyId, int jobId, JobEntry job)
             throws SQLException {
+        UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         String sql = """
                 UPDATE jobs j
                 JOIN companies c ON c.company_id = j.company_id
@@ -141,6 +146,7 @@ public class JobDAO {
     }
 
     public boolean deactivateForEmployer(int employerUserId, int companyId, int jobId) throws SQLException {
+        UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         String sql = """
                 UPDATE jobs j
                 JOIN companies c ON c.company_id = j.company_id

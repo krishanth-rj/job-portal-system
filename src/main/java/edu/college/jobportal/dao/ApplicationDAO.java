@@ -24,6 +24,7 @@ public class ApplicationDAO {
 
     /** Resolves seeker_id from userId and applies only while the selected job is active. */
     public ApplyResult applyToJob(int userId, int jobId) throws SQLException {
+        UserSession.requireCurrent(userId, UserRole.JOB_SEEKER);
         try (Connection connection = DBConnection.getConnection()) {
             boolean originalAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
@@ -72,6 +73,7 @@ public class ApplicationDAO {
 
     /** Returns only applications whose seeker profile belongs to the authenticated user. */
     public ApplicationsOverview listForUser(int userId) throws SQLException {
+        UserSession.requireCurrent(userId, UserRole.JOB_SEEKER);
         String sql = """
                 SELECT a.application_id, a.application_date, a.status,
                        j.job_title, j.location AS job_location, j.status AS job_status,
