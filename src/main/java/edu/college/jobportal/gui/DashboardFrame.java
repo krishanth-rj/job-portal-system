@@ -59,7 +59,13 @@ public class DashboardFrame extends JFrame {
                     BorderFactory.createLineBorder(new Color(215, 224, 236)),
                     BorderFactory.createEmptyBorder(12, 16, 12, 16)));
             button.addActionListener(event -> {
-                if (user.role() == UserRole.EMPLOYER && "Manage Jobs".equals(feature)) {
+                if (user.role() == UserRole.JOB_SEEKER && "Search Jobs".equals(feature)) {
+                    setVisible(false);
+                    new JobSearchFrame(user, this::restoreDashboard).setVisible(true);
+                } else if (user.role() == UserRole.JOB_SEEKER && "My Applications".equals(feature)) {
+                    setVisible(false);
+                    new MyApplicationsFrame(user, this::restoreDashboard).setVisible(true);
+                } else if (user.role() == UserRole.EMPLOYER && "Manage Jobs".equals(feature)) {
                     setVisible(false);
                     new EmployerJobManagementFrame(user, () -> setVisible(true)).setVisible(true);
                 } else {
@@ -88,6 +94,11 @@ public class DashboardFrame extends JFrame {
         root.add(actions, BorderLayout.CENTER);
         root.add(footer, BorderLayout.SOUTH);
         return root;
+    }
+
+    private void restoreDashboard() {
+        setVisible(true);
+        toFront();
     }
 
     private static String titleFor(UserRole role) {

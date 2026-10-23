@@ -2,6 +2,7 @@ package edu.college.jobportal.dao;
 
 import edu.college.jobportal.database.DBConnection;
 import edu.college.jobportal.model.JobEntry;
+import edu.college.jobportal.model.JobListing;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +14,15 @@ import java.util.List;
 
 /** Job operations that verify company ownership against the employer user ID on every query. */
 public class JobDAO {
+    private static final String SEEKER_SEARCH_COLUMNS = """
+            SELECT j.job_id, j.job_title, j.description, j.required_skills, j.location,
+                   j.salary, j.experience_required, j.job_type, j.posted_date,
+                   c.company_name, c.description AS company_description,
+                   c.location AS company_location, c.website AS company_website
+            FROM jobs j
+            JOIN companies c ON c.company_id = j.company_id
+            WHERE UPPER(j.status) = 'ACTIVE'
+            """;
     private static final String OWNERSHIP_JOINS = """
             FROM jobs j
             JOIN companies c ON c.company_id = j.company_id
@@ -35,6 +45,44 @@ public class JobDAO {
                 List<JobEntry> jobs = new ArrayList<>();
                 while (results.next()) {
                     jobs.add(mapJob(results));
+                }
+                return jobs;
+            }
+        }
+    }
+
+    /** Searches active vacancies only; optional keyword and location filters are parameterized. */
+    public List<JobListing> searchActiveJobs(String keyword, String location) throws SQLException {
+        String normalizedKeyword = keyword == null ? "" : keyword.trim();
+        String normalizedLocation = location == null ? "" : location.trim();
+        StringBuilder sql = new StringBuilder(SEEKER_SEARCH_COLUMNS);
+        if (!normalizedKeyword.isEmpty()) {
+            sql.append(" AND (j.job_title LIKE ? OR c.company_name LIKE ? OR j.description LIKE ?")
+                    .append(" OR j.required_skills LIKE ? OR j.experience_required LIKE ? OR j.job_type LIKE ?)");
+        }
+        if (!normalizedLocation.isEmpty()) {
+            sql.append(" AND (j.location LIKE ? OR c.location LIKE ?)");
+        }
+        sql.append(" ORDER BY j.posted_date DESC, j.job_id DESC");
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+            int parameter = 1;
+            if (!normalizedKeyword.isEmpty()) {
+                String pattern = "%" + normalizedKeyword + "%";
+                for (int i = 0; i < 6; i++) {
+                    statement.setString(parameter++, pattern);
+                }
+            }
+            if (!normalizedLocation.isEmpty()) {
+                String pattern = "%" + normalizedLocation + "%";
+                statement.setString(parameter++, pattern);
+                statement.setString(parameter, pattern);
+            }
+            try (ResultSet results = statement.executeQuery()) {
+                List<JobListing> jobs = new ArrayList<>();
+                while (results.next()) {
+                    jobs.add(mapListing(results));
                 }
                 return jobs;
             }
@@ -130,6 +178,16 @@ public class JobDAO {
                 result.getString("location"), result.getBigDecimal("salary"),
                 result.getString("experience_required"), result.getString("job_type"),
                 result.getTimestamp("posted_date"), result.getString("status"));
+    }
+
+    private static JobListing mapListing(ResultSet result) throws SQLException {
+        return new JobListing(result.getInt("job_id"), result.getString("job_title"),
+                result.getString("description"), result.getString("required_skills"),
+                result.getString("location"), result.getBigDecimal("salary"),
+                result.getString("experience_required"), result.getString("job_type"),
+                result.getTimestamp("posted_date"), result.getString("company_name"),
+                result.getString("company_description"), result.getString("company_location"),
+                result.getString("company_website"));
     }
 
     private static String blankToNull(String value) {
