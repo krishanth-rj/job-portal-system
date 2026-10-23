@@ -4,6 +4,7 @@ import edu.college.jobportal.dao.AuthenticatedUser;
 import edu.college.jobportal.dao.UserDAO;
 
 import javax.swing.BorderFactory;
+import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -78,9 +79,19 @@ public class LoginFrame extends JFrame {
         loginButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         loginButton.setForeground(Color.WHITE);
         loginButton.setBackground(ACCENT);
+        // Aqua's native button painter ignores custom background colors, hiding this
+        // white icon and label on a white surface. Use Swing's painter for this
+        // deliberately blue primary action so its contrast is consistent by L&F.
+        loginButton.setUI(new BasicButtonUI());
+        loginButton.setOpaque(true);
+        loginButton.setContentAreaFilled(true);
+        loginButton.setIcon(new FeatureIcon(FeatureIcon.Type.SIGN_IN, Color.WHITE));
+        loginButton.setIconTextGap(9);
         loginButton.setFocusPainted(false);
         loginButton.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
         loginButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        registerButton.setIcon(new FeatureIcon(FeatureIcon.Type.USER_PLUS, registerButton.getForeground()));
+        registerButton.setIconTextGap(9);
         registerButton.setFocusPainted(false);
 
         JPanel actions = new JPanel(new GridLayout(0, 1, 0, 8));
