@@ -78,6 +78,8 @@ public class DashboardFrame extends JFrame {
                     openChild(() -> new MyApplicationsFrame(user, this::restoreDashboard));
                 } else if (user.role() == UserRole.EMPLOYER && "View Applicants".equals(feature)) {
                     openChild(() -> new EmployerApplicantsFrame(user, this::restoreDashboard));
+                } else if (user.role() == UserRole.EMPLOYER && "Post a Job".equals(feature)) {
+                    openChild(() -> new EmployerJobManagementFrame(user, this::restoreDashboard, true));
                 } else if (user.role() == UserRole.EMPLOYER && "Manage Jobs".equals(feature)) {
                     openChild(() -> new EmployerJobManagementFrame(user, this::restoreDashboard));
                 } else if (user.role() == UserRole.JOB_SEEKER && "My Profile".equals(feature)) {

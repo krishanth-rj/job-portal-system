@@ -20,6 +20,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -46,6 +47,7 @@ public class EmployerJobManagementFrame extends JFrame {
     private final Runnable onClose;
     private final CompanyDAO companyDAO = new CompanyDAO();
     private final JobDAO jobDAO = new JobDAO();
+    private final boolean openAddJobOnReady;
     private final JobTableModel tableModel = new JobTableModel();
     private final JTable jobsTable = new JTable(tableModel);
     private final JLabel statusLabel = new JLabel("Loading company profile…", SwingConstants.CENTER);
@@ -55,8 +57,14 @@ public class EmployerJobManagementFrame extends JFrame {
     private final JButton deactivateButton = new JButton("Deactivate Job");
     private CompanyProfile company;
     private boolean busy;
+    private boolean initialAddJobScheduled;
 
     public EmployerJobManagementFrame(AuthenticatedUser employer, Runnable onClose) {
+        this(employer, onClose, false);
+    }
+
+    /** Opens this screen and optionally starts the existing Add Job workflow once company setup is ready. */
+    public EmployerJobManagementFrame(AuthenticatedUser employer, Runnable onClose, boolean openAddJobOnReady) {
         super("Employer Job Management");
         if (employer.role() != UserRole.EMPLOYER) {
             throw new IllegalArgumentException("Employer access is required.");
@@ -66,6 +74,7 @@ public class EmployerJobManagementFrame extends JFrame {
         }
         this.employer = employer;
         this.onClose = onClose;
+        this.openAddJobOnReady = openAddJobOnReady;
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(900, 560));
         addWindowListener(new WindowAdapter() {
@@ -103,7 +112,11 @@ public class EmployerJobManagementFrame extends JFrame {
                         showCompanySetup();
                     } else {
                         showJobsScreen();
-                        refreshJobs();
+                        if (openAddJobOnReady) {
+                            scheduleInitialAddJob();
+                        } else {
+                            refreshJobs();
+                        }
                     }
                 } catch (InterruptedException exception) {
                     Thread.currentThread().interrupt();
@@ -172,7 +185,11 @@ public class EmployerJobManagementFrame extends JFrame {
                         JOptionPane.showMessageDialog(EmployerJobManagementFrame.this,
                                 "Company profile is ready.", "Company saved", JOptionPane.INFORMATION_MESSAGE);
                         showJobsScreen();
-                        refreshJobs();
+                        if (openAddJobOnReady) {
+                            scheduleInitialAddJob();
+                        } else {
+                            refreshJobs();
+                        }
                     } catch (InterruptedException exception) {
                         Thread.currentThread().interrupt();
                         save.setEnabled(true);
@@ -284,7 +301,21 @@ public class EmployerJobManagementFrame extends JFrame {
         JobEntry job = JobEditorDialog.showDialog(this, null);
         if (job != null) {
             saveJob(job, false);
+        } else if (openAddJobOnReady) {
+            refreshJobs();
         }
+    }
+
+    private void scheduleInitialAddJob() {
+        if (initialAddJobScheduled) {
+            return;
+        }
+        initialAddJobScheduled = true;
+        SwingUtilities.invokeLater(() -> {
+            if (isDisplayable() && isVisible() && UserSession.isCurrent(employer)) {
+                addJob();
+            }
+        });
     }
 
     private void editJob() {
