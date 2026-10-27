@@ -2,6 +2,7 @@ package edu.college.jobportal.dao;
 
 import edu.college.jobportal.database.DBConnection;
 import edu.college.jobportal.model.ApplicationEntry;
+import edu.college.jobportal.repository.ApplicationRepository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,18 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Application operations scoped to the authenticated user's job seeker profile. */
-public class ApplicationDAO {
-    public enum ApplyResult {
-        APPLIED,
-        ALREADY_APPLIED,
-        JOB_UNAVAILABLE,
-        NO_SEEKER_PROFILE
-    }
-
-    public record ApplicationsOverview(boolean seekerProfileExists, List<ApplicationEntry> applications) {
-    }
-
+public class ApplicationDAO implements ApplicationRepository {
     /** Resolves seeker_id from userId and applies only while the selected job is active. */
+    @Override
     public ApplyResult applyToJob(int userId, int jobId) throws SQLException {
         UserSession.requireCurrent(userId, UserRole.JOB_SEEKER);
         try (Connection connection = DBConnection.getConnection()) {
@@ -72,6 +64,7 @@ public class ApplicationDAO {
     }
 
     /** Returns only applications whose seeker profile belongs to the authenticated user. */
+    @Override
     public ApplicationsOverview listForUser(int userId) throws SQLException {
         UserSession.requireCurrent(userId, UserRole.JOB_SEEKER);
         String sql = """

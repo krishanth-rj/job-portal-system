@@ -7,6 +7,7 @@ import edu.college.jobportal.dao.AuthenticatedUser;
 import edu.college.jobportal.dao.UserSession;
 import edu.college.jobportal.model.CompanyProfile;
 import edu.college.jobportal.model.JobEntry;
+import edu.college.jobportal.repository.JobRepository;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -33,7 +34,7 @@ import java.awt.Insets;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -46,7 +47,7 @@ public class EmployerJobManagementFrame extends JFrame {
     private final AuthenticatedUser employer;
     private final Runnable onClose;
     private final CompanyDAO companyDAO = new CompanyDAO();
-    private final JobDAO jobDAO = new JobDAO();
+    private final JobRepository jobDAO = new JobDAO();
     private final boolean openAddJobOnReady;
     private final JobTableModel tableModel = new JobTableModel();
     private final JTable jobsTable = new JTable(tableModel);
@@ -485,7 +486,7 @@ public class EmployerJobManagementFrame extends JFrame {
 
     private static final class JobTableModel extends AbstractTableModel {
         private static final String[] COLUMNS = {"Job ID", "Title", "Location", "Job Type", "Posted Date", "Status"};
-        private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        private final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         private List<JobEntry> jobs = new ArrayList<>();
 
         void setJobs(List<JobEntry> jobs) {
@@ -520,7 +521,8 @@ public class EmployerJobManagementFrame extends JFrame {
                 case 1 -> job.jobTitle();
                 case 2 -> job.location() == null ? "" : job.location();
                 case 3 -> job.jobType() == null ? "" : job.jobType();
-                case 4 -> job.postedDate() == null ? "" : dateFormat.format(job.postedDate());
+                case 4 -> job.postedDate() == null ? ""
+                        : job.postedDate().toLocalDateTime().format(dateFormat);
                 case 5 -> job.status() == null ? "" : job.status();
                 default -> throw new IndexOutOfBoundsException("Unknown job table column");
             };

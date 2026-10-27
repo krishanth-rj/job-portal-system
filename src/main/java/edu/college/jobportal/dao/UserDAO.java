@@ -40,8 +40,8 @@ public class UserDAO {
             statement.setString(5, role);
             return statement.executeUpdate() == 1;
         } catch (SQLException exception) {
-            if (exception.getErrorCode() == 1062 && "23000".equals(exception.getSQLState())) {
-                throw new DuplicateEmailException();
+            if (isDuplicateKey(exception)) {
+                throw new DuplicateEmailException(exception);
             }
             throw exception;
         }
@@ -92,5 +92,14 @@ public class UserDAO {
                 System.out.println("SELECT completed successfully; users table is empty.");
             }
         }
+    }
+
+    private static boolean isDuplicateKey(SQLException exception) {
+        for (SQLException current = exception; current != null; current = current.getNextException()) {
+            if (current.getErrorCode() == 1062 && "23000".equals(current.getSQLState())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

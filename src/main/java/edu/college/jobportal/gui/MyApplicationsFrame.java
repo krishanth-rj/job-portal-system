@@ -4,6 +4,7 @@ import edu.college.jobportal.dao.ApplicationDAO;
 import edu.college.jobportal.dao.AuthenticatedUser;
 import edu.college.jobportal.dao.UserSession;
 import edu.college.jobportal.model.ApplicationEntry;
+import edu.college.jobportal.repository.ApplicationRepository;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -32,7 +33,7 @@ public class MyApplicationsFrame extends JFrame {
     private static final Color NAVY = new Color(26, 43, 74);
     private final AuthenticatedUser user;
     private final Runnable returnToDashboard;
-    private final ApplicationDAO applicationDAO = new ApplicationDAO();
+    private final ApplicationRepository applicationDAO = new ApplicationDAO();
     private final JLabel statusLabel = new JLabel("Loading your applications…", SwingConstants.LEFT);
     private final JButton refreshButton = new JButton("Refresh");
     private final DefaultTableModel tableModel = new DefaultTableModel(
@@ -100,9 +101,9 @@ public class MyApplicationsFrame extends JFrame {
     private void refreshApplications() {
         refreshButton.setEnabled(false);
         statusLabel.setText("Loading your applications…");
-        new SwingWorker<ApplicationDAO.ApplicationsOverview, Void>() {
+        new SwingWorker<ApplicationRepository.ApplicationsOverview, Void>() {
             @Override
-            protected ApplicationDAO.ApplicationsOverview doInBackground() throws SQLException {
+            protected ApplicationRepository.ApplicationsOverview doInBackground() throws SQLException {
                 return applicationDAO.listForUser(user.userId());
             }
 
@@ -110,7 +111,7 @@ public class MyApplicationsFrame extends JFrame {
             protected void done() {
                 refreshButton.setEnabled(true);
                 try {
-                    ApplicationDAO.ApplicationsOverview overview = get();
+                    ApplicationRepository.ApplicationsOverview overview = get();
                     tableModel.setRowCount(0);
                     List<ApplicationEntry> applications = overview.applications();
                     for (ApplicationEntry application : applications) {

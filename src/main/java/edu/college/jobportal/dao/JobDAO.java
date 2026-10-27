@@ -3,6 +3,7 @@ package edu.college.jobportal.dao;
 import edu.college.jobportal.database.DBConnection;
 import edu.college.jobportal.model.JobEntry;
 import edu.college.jobportal.model.JobListing;
+import edu.college.jobportal.repository.JobRepository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Job operations that verify company ownership against the employer user ID on every query. */
-public class JobDAO {
+public class JobDAO implements JobRepository {
     private static final String SEEKER_SEARCH_COLUMNS = """
             SELECT j.job_id, j.job_title, j.description, j.required_skills, j.location,
                    j.salary, j.experience_required, j.job_type, j.posted_date,
@@ -34,6 +35,7 @@ public class JobDAO {
                    j.salary, j.experience_required, j.job_type, j.posted_date, j.status
             """;
 
+    @Override
     public List<JobEntry> listForEmployer(int employerUserId, int companyId) throws SQLException {
         UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         String sql = SELECT_COLUMNS + OWNERSHIP_JOINS + " WHERE c.company_id = ? AND c.user_id = ? "
@@ -53,6 +55,7 @@ public class JobDAO {
     }
 
     /** Searches active vacancies only; optional keyword and location filters are parameterized. */
+    @Override
     public List<JobListing> searchActiveJobs(int seekerUserId, String keyword, String location) throws SQLException {
         UserSession.requireCurrent(seekerUserId, UserRole.JOB_SEEKER);
         String normalizedKeyword = keyword == null ? "" : keyword.trim();
@@ -91,6 +94,7 @@ public class JobDAO {
         }
     }
 
+    @Override
     public JobEntry findForEmployer(int employerUserId, int companyId, int jobId) throws SQLException {
         UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         String sql = SELECT_COLUMNS + OWNERSHIP_JOINS + " WHERE j.job_id = ? AND c.company_id = ? "
@@ -106,6 +110,7 @@ public class JobDAO {
         }
     }
 
+    @Override
     public boolean createForEmployer(int employerUserId, int companyId, JobEntry job) throws SQLException {
         UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         String sql = """
@@ -124,6 +129,7 @@ public class JobDAO {
         }
     }
 
+    @Override
     public boolean updateForEmployer(int employerUserId, int companyId, int jobId, JobEntry job)
             throws SQLException {
         UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
@@ -145,6 +151,7 @@ public class JobDAO {
         }
     }
 
+    @Override
     public boolean deactivateForEmployer(int employerUserId, int companyId, int jobId) throws SQLException {
         UserSession.requireCurrent(employerUserId, UserRole.EMPLOYER);
         String sql = """

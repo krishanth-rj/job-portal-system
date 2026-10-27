@@ -5,6 +5,8 @@ import edu.college.jobportal.dao.AuthenticatedUser;
 import edu.college.jobportal.dao.JobDAO;
 import edu.college.jobportal.dao.UserSession;
 import edu.college.jobportal.model.JobListing;
+import edu.college.jobportal.repository.ApplicationRepository;
+import edu.college.jobportal.repository.JobRepository;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -40,8 +42,8 @@ public class JobSearchFrame extends JFrame {
 
     private final AuthenticatedUser user;
     private final Runnable returnToDashboard;
-    private final JobDAO jobDAO = new JobDAO();
-    private final ApplicationDAO applicationDAO = new ApplicationDAO();
+    private final JobRepository jobDAO = new JobDAO();
+    private final ApplicationRepository applicationDAO = new ApplicationDAO();
     private final JTextField keywordField = new JTextField(22);
     private final JTextField locationField = new JTextField(15);
     private final JLabel statusLabel = new JLabel("Loading active vacancies…", SwingConstants.LEFT);
@@ -210,9 +212,9 @@ public class JobSearchFrame extends JFrame {
         }
         setBusy(true);
         statusLabel.setText("Submitting application…");
-        new SwingWorker<ApplicationDAO.ApplyResult, Void>() {
+        new SwingWorker<ApplicationRepository.ApplyResult, Void>() {
             @Override
-            protected ApplicationDAO.ApplyResult doInBackground() throws SQLException {
+            protected ApplicationRepository.ApplyResult doInBackground() throws SQLException {
                 return applicationDAO.applyToJob(user.userId(), selected.jobId());
             }
 
